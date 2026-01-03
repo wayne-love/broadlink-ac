@@ -782,6 +782,7 @@ class ac_db(device):
                 self.logger.debug("AcInfo: Invalid, seems to short?")
                 return 0
 
+            ## Taken from https://github.com/liaan/broadlink_ac_mqtt
 			##Its 7 bit as 32.0 multiplier and the last 5 bits?
             ambient_temp: float = float((response_payload[15] >> 6) & 0b00000001)*32.0 + float(response_payload[15] & 0b00011111) + float(response_payload[31] & 0b00011111)/10.0
                 
