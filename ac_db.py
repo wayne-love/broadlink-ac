@@ -783,10 +783,11 @@ class ac_db(device):
                 return 0
 
             ##Its only the last 5 bits?
-            ambient_temp = response_payload[15] & 0b00011111
+            ##Add decimal part
+            ambient_temp = (float(response_payload[15] & 0b00011111) + float(response_payload[31] & 0b00011111)/10.0)
 
             self.logger.debug(
-                "Ambient Temp Decimal: %s" % float(response_payload[31] & 0b00011111)
+                "Ambient Temp Decimal: %s" % float(ambient_temp)
             )  ## @Anonym-tsk
 
             if ambient_temp:
