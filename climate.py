@@ -32,6 +32,8 @@ SUPPORTED_HVAC_MODES = [
     HVACMode.DRY,
     HVACMode.FAN_ONLY,
 ]
+SUPPORTED_SWING_MODES = ["AUTO", "TOP", "MIDDLE1", "MIDDLE2", "MIDDLE3", "BOTTOM", "SWING"]
+SUPPORTED_SWING_HORIZONTAL_MODES = ["LEFT_FIX", "LEFT_FLAP", "LEFT_RIGHT_FIX", "LEFT_RIGHT_FLAP", "RIGHT_FIX", "RIGHT_FLAP", "ON", "OFF"]
 
 
 async def async_setup_entry(
@@ -51,9 +53,13 @@ class BroadlinkACClimate(ClimateEntity):
         | ClimateEntityFeature.FAN_MODE
         | ClimateEntityFeature.TURN_ON
         | ClimateEntityFeature.TURN_OFF
+        | ClimateEntityFeature.SWING_MODE
+        | ClimateEntityFeature.SWING_HORIZONTAL_MODE
     )
     _attr_hvac_modes = SUPPORTED_HVAC_MODES
     _attr_fan_modes = SUPPORTED_FAN_MODES
+    _attr_swing_modes = SUPPORTED_SWING_MODES
+    _attr_swing_horizontal_modes = SUPPORTED_SWING_HORIZONTAL_MODES
 
     def __init__(self, ac_instance: ac_db, entry: ConfigEntry) -> None:
         """Initialize the climate entity."""
@@ -65,6 +71,8 @@ class BroadlinkACClimate(ClimateEntity):
         self._attr_target_temperature = None
         self._attr_hvac_mode = HVACMode.OFF
         self._attr_fan_mode = FAN_AUTO
+        self._attr_swing_mode = "AUTO"
+        self._attr_swing_horizontal_mode = "OFF"
 
     async def async_update(self) -> None:
         """Fetch the latest state from the AC."""
@@ -79,6 +87,10 @@ class BroadlinkACClimate(ClimateEntity):
         else:
             self._attr_hvac_mode = self._map_mode_to_hvac(status.get("mode"))
         self._attr_fan_mode = status.get("fanspeed").lower()
+        # Set swing mode to vertical fixation
+        self._attr_swing_mode = status.get("fixation_v")
+        # Set horizontal swing mode to horizontal fixation
+        self._attr_swing_horizontal_mode = status.get("fixation_h")
 
     async def async_set_temperature(self, **kwargs: Any) -> None:
         """Set the target temperature."""
@@ -97,6 +109,18 @@ class BroadlinkACClimate(ClimateEntity):
         """Set the fan mode."""
         self._ac.set_fanspeed(fan_mode.upper())
         self._attr_fan_mode = fan_mode
+        self.async_write_ha_state()
+
+    async def async_set_swing_mode(self, swing_mode: str) -> None:
+        """Set the swing mode."""
+        self._ac.set_fixation_v(swing_mode)
+        self._attr_swing_mode = swing_mode
+        self.async_write_ha_state()
+
+    async def async_set_swing_horizontal_mode(self, swing_horizontal_mode: str) -> None:
+        """Set the horizontal swing mode."""
+        self._ac.set_fixation_h(swing_horizontal_mode)
+        self._attr_swing_horizontal_mode = swing_horizontal_mode
         self.async_write_ha_state()
 
     async def async_turn_on(self) -> None:
