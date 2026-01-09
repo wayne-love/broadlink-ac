@@ -862,7 +862,9 @@ class ac_db(device):
                 + (0.5 * float(response_payload[12] >> 7))
             )
             self.status["power"] = response_payload[18] >> 5 & 0b00000001
-            self.status["fixation_v"] = response_payload[10] & 0b00000111
+            fixation_v_raw = response_payload[10] & 0b00000111
+            # Map 0 to SWING mode (device returns 0 when SWING is active)
+            self.status["fixation_v"] = self.STATIC.FIXATION.VERTICAL.SWING if fixation_v_raw == 0 else fixation_v_raw
             self.status["mode"] = response_payload[15] >> 5 & 0b00001111
             self.status["sleep"] = response_payload[15] >> 2 & 0b00000001
             self.status["display"] = response_payload[20] >> 4 & 0b00000001
@@ -1228,7 +1230,9 @@ class ac_db_debug(device):
                 + (0.5 * float(response_payload[12] >> 7))
             )
             self.status["power"] = response_payload[18] >> 5 & 0b00000001
-            self.status["fixation_v"] = response_payload[10] & 0b00000111
+            fixation_v_raw = response_payload[10] & 0b00000111
+            # Map 0 to SWING mode (device returns 0 when SWING is active)
+            self.status["fixation_v"] = ac_db.STATIC.FIXATION.VERTICAL.SWING if fixation_v_raw == 0 else fixation_v_raw
             self.status["mode"] = response_payload[15] >> 5 & 0b00001111
             self.status["sleep"] = response_payload[15] >> 2 & 0b00000001
             self.status["display"] = response_payload[20] >> 4 & 0b00000001
