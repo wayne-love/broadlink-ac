@@ -19,7 +19,7 @@ from homeassistant.const import ATTR_TEMPERATURE, UnitOfTemperature
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .ac_db import ac_db
+from .ac_db import ac_db, ConnectTimeout, ConnectError
 from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
@@ -76,52 +76,72 @@ class BroadlinkACClimate(ClimateEntity):
 
     async def async_update(self) -> None:
         """Fetch the latest state from the AC."""
-        status = self._ac.get_ac_status(force_update=True)
-        if status is bool:
-            _LOGGER.error("Failed to get AC status")
-            return
-        self._attr_current_temperature = status.get("ambient_temp")
-        self._attr_target_temperature = status.get("temp")
-        if status.get("power") == "OFF":
-            self._attr_hvac_mode = HVACMode.OFF
-        else:
-            self._attr_hvac_mode = self._map_mode_to_hvac(status.get("mode"))
-        self._attr_fan_mode = status.get("fanspeed").lower()
-        # Set swing mode to vertical fixation
-        self._attr_swing_mode = status.get("fixation_v")
-        # Set horizontal swing mode to horizontal fixation
-        self._attr_swing_horizontal_mode = status.get("fixation_h")
+        try:
+            status = self._ac.get_ac_status(force_update=True)
+            if status is bool:
+                _LOGGER.error("Failed to get AC status")
+                return
+            self._attr_current_temperature = status.get("ambient_temp")
+            self._attr_target_temperature = status.get("temp")
+            if status.get("power") == "OFF":
+                self._attr_hvac_mode = HVACMode.OFF
+            else:
+                self._attr_hvac_mode = self._map_mode_to_hvac(status.get("mode"))
+            self._attr_fan_mode = status.get("fanspeed").lower()
+            # Set swing mode to vertical fixation
+            self._attr_swing_mode = status.get("fixation_v")
+            # Set horizontal swing mode to horizontal fixation
+            self._attr_swing_horizontal_mode = status.get("fixation_h")
+        except ConnectTimeout:
+            _LOGGER.warning("Connection timeout while updating AC status")
+        except ConnectError as err:
+            _LOGGER.error("Connection error while updating AC status: %s", err)
 
     async def async_set_temperature(self, **kwargs: Any) -> None:
         """Set the target temperature."""
         if (temperature := kwargs.get(ATTR_TEMPERATURE)) is not None:
-            self._ac.set_temperature(temperature)
-            self._attr_target_temperature = temperature
-            self.async_write_ha_state()
+            try:
+                self._ac.set_temperature(temperature)
+                self._attr_target_temperature = temperature
+                self.async_write_ha_state()
+            except (ConnectTimeout, ConnectError) as err:
+                _LOGGER.error("Failed to set temperature: %s", err)
 
     async def async_set_hvac_mode(self, hvac_mode: HVACMode) -> None:
         """Set the HVAC mode."""
-        self._ac.set_homeassistant_mode(str(hvac_mode))
-        self._attr_hvac_mode = hvac_mode
-        self.async_write_ha_state()
+        try:
+            self._ac.set_homeassistant_mode(str(hvac_mode))
+            self._attr_hvac_mode = hvac_mode
+            self.async_write_ha_state()
+        except (ConnectTimeout, ConnectError) as err:
+            _LOGGER.error("Failed to set HVAC mode: %s", err)
 
     async def async_set_fan_mode(self, fan_mode: str) -> None:
         """Set the fan mode."""
-        self._ac.set_fanspeed(fan_mode.upper())
-        self._attr_fan_mode = fan_mode
-        self.async_write_ha_state()
+        try:
+            self._ac.set_fanspeed(fan_mode.upper())
+            self._attr_fan_mode = fan_mode
+            self.async_write_ha_state()
+        except (ConnectTimeout, ConnectError) as err:
+            _LOGGER.error("Failed to set fan mode: %s", err)
 
     async def async_set_swing_mode(self, swing_mode: str) -> None:
         """Set the swing mode."""
-        self._ac.set_fixation_v(swing_mode)
-        self._attr_swing_mode = swing_mode
-        self.async_write_ha_state()
+        try:
+            self._ac.set_fixation_v(swing_mode)
+            self._attr_swing_mode = swing_mode
+            self.async_write_ha_state()
+        except (ConnectTimeout, ConnectError) as err:
+            _LOGGER.error("Failed to set swing mode: %s", err)
 
     async def async_set_swing_horizontal_mode(self, swing_horizontal_mode: str) -> None:
         """Set the horizontal swing mode."""
-        self._ac.set_fixation_h(swing_horizontal_mode)
-        self._attr_swing_horizontal_mode = swing_horizontal_mode
-        self.async_write_ha_state()
+        try:
+            self._ac.set_fixation_h(swing_horizontal_mode)
+            self._attr_swing_horizontal_mode = swing_horizontal_mode
+            self.async_write_ha_state()
+        except (ConnectTimeout, ConnectError) as err:
+            _LOGGER.error("Failed to set horizontal swing mode: %s", err)
 
     async def async_turn_on(self) -> None:
         """Turn the device on."""
