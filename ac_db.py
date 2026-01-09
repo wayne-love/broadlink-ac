@@ -519,6 +519,12 @@ class ac_db(device):
 
         return self.make_nice_status(self.status)
 
+    def start(self):
+        return self.switch_on()
+
+    def stop(self):
+        return self.switch_off()
+
     def set_mode(self, mode_text):
         ##Make sure latest info as cannot just update one things, have set all
         self.get_ac_states()

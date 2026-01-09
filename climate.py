@@ -47,7 +47,10 @@ class BroadlinkACClimate(ClimateEntity):
 
     _attr_temperature_unit = UnitOfTemperature.CELSIUS
     _attr_supported_features = (
-        ClimateEntityFeature.TARGET_TEMPERATURE | ClimateEntityFeature.FAN_MODE
+        ClimateEntityFeature.TARGET_TEMPERATURE
+        | ClimateEntityFeature.FAN_MODE
+        | ClimateEntityFeature.TURN_ON
+        | ClimateEntityFeature.TURN_OFF
     )
     _attr_hvac_modes = SUPPORTED_HVAC_MODES
     _attr_fan_modes = SUPPORTED_FAN_MODES
@@ -95,6 +98,22 @@ class BroadlinkACClimate(ClimateEntity):
         self._ac.set_fanspeed(fan_mode.upper())
         self._attr_fan_mode = fan_mode
         self.async_write_ha_state()
+
+    async def async_turn_on(self) -> None:
+        """Turn the device on."""
+        await self.async_set_hvac_mode(HVACMode.AUTO)
+
+    async def async_turn_off(self) -> None:
+        """Turn the device off."""
+        await self.async_set_hvac_mode(HVACMode.OFF)
+
+    async def start(self) -> None:
+        """Start the device."""
+        await self.async_turn_on()
+
+    async def stop(self) -> None:
+        """Stop the device."""
+        await self.async_turn_off()
 
     def _map_mode_to_hvac(self, mode: str) -> HVACMode:
         """Map AC mode to Home Assistant HVAC mode."""
