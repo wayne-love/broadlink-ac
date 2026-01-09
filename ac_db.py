@@ -367,13 +367,16 @@ class ac_db(device):
                 SWING = 0b00000110
                 AUTO = 0b00000111
 
-            class HORIZONTAL:  ##Don't think this really works for all devices.
-                LEFT_FIX = 2
-                LEFT_FLAP = 1
-                LEFT_RIGHT_FIX = 7
-                LEFT_RIGHT_FLAP = 0
-                RIGHT_FIX = 6
-                RIGHT_FLAP = 5
+            class HORIZONTAL:  
+                # Position modes (retained for reference, not currently used)
+                # Don't think this really works for all devices + there is overlap in the values
+                # suggesting that the raw data is not being parsed correctly.
+                # LEFT_FIX = 2
+                # LEFT_FLAP = 1
+                # LEFT_RIGHT_FIX = 7
+                # LEFT_RIGHT_FLAP = 0
+                # RIGHT_FIX = 6
+                # RIGHT_FLAP = 5
                 ON = 0
                 OFF = 1
 
@@ -862,15 +865,13 @@ class ac_db(device):
                 + (0.5 * float(response_payload[12] >> 7))
             )
             self.status["power"] = response_payload[18] >> 5 & 0b00000001
-            fixation_v_raw = response_payload[10] & 0b00000111
-            # Map 0 to SWING mode (device returns 0 when SWING is active)
-            self.status["fixation_v"] = self.STATIC.FIXATION.VERTICAL.SWING if fixation_v_raw == 0 else fixation_v_raw
+            self.status["fixation_v"] = response_payload[10] & 0b00000111
             self.status["mode"] = response_payload[15] >> 5 & 0b00001111
             self.status["sleep"] = response_payload[15] >> 2 & 0b00000001
             self.status["display"] = response_payload[20] >> 4 & 0b00000001
             self.status["mildew"] = response_payload[20] >> 3 & 0b00000001
             self.status["health"] = response_payload[18] >> 1 & 0b00000001
-            self.status["fixation_h"] = response_payload[11] >> 5 & 0b00000111
+            self.status["fixation_h"] = response_payload[10] & 0b00000111
             self.status["fanspeed"] = response_payload[13] >> 5 & 0b00000111
             self.status["ifeel"] = response_payload[15] >> 3 & 0b00000001
             self.status["mute"] = response_payload[14] >> 7 & 0b00000001
@@ -1230,9 +1231,7 @@ class ac_db_debug(device):
                 + (0.5 * float(response_payload[12] >> 7))
             )
             self.status["power"] = response_payload[18] >> 5 & 0b00000001
-            fixation_v_raw = response_payload[10] & 0b00000111
-            # Map 0 to SWING mode (device returns 0 when SWING is active)
-            self.status["fixation_v"] = ac_db.STATIC.FIXATION.VERTICAL.SWING if fixation_v_raw == 0 else fixation_v_raw
+            self.status["fixation_v"] = response_payload[10] & 0b00000111
             self.status["mode"] = response_payload[15] >> 5 & 0b00001111
             self.status["sleep"] = response_payload[15] >> 2 & 0b00000001
             self.status["display"] = response_payload[20] >> 4 & 0b00000001
