@@ -883,7 +883,7 @@ class ac_db(device):
             self.status["display"] = response_payload[20] >> 4 & 0b00000001
             self.status["mildew"] = response_payload[20] >> 3 & 0b00000001
             self.status["health"] = response_payload[18] >> 1 & 0b00000001
-            self.status["fixation_h"] = response_payload[10] & 0b00000111
+            self.status["fixation_h"] = response_payload[11] >> 5 & 0b00000001
             self.status["fanspeed"] = response_payload[13] >> 5 & 0b00000111
             self.status["ifeel"] = response_payload[15] >> 3 & 0b00000001
             self.status["mute"] = response_payload[14] >> 7 & 0b00000001
@@ -1249,7 +1249,7 @@ class ac_db_debug(device):
             self.status["display"] = response_payload[20] >> 4 & 0b00000001
             self.status["mildew"] = response_payload[20] >> 3 & 0b00000001
             self.status["health"] = response_payload[18] >> 1 & 0b00000001
-            self.status["fixation_h"] = response_payload[11] >> 5 & 0b00000001  # Bit 5 of byte 11: 0=ON, 1=OFFON, 1=OFF
+            self.status["fixation_h"] = response_payload[11] >> 5 & 0b00000001
             self.status["fanspeed"] = response_payload[13] >> 5 & 0b00000111
             self.status["ifeel"] = response_payload[15] >> 3 & 0b00000001
             self.status["mute"] = response_payload[14] >> 7 & 0b00000001
