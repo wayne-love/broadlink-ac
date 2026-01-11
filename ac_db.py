@@ -499,7 +499,7 @@ class ac_db(device):
         self.status["display"] = self.STATIC.ONOFF.ON
         self.status["health"] = self.STATIC.ONOFF.OFF
         self.status["ifeel"] = self.STATIC.ONOFF.OFF
-        self.status["fixation_h"] = self.STATIC.FIXATION.HORIZONTAL.LEFT_RIGHT_FIX
+        self.status["fixation_h"] = self.STATIC.FIXATION.HORIZONTAL.OFF
         self.status["fanspeed"] = self.STATIC.FAN.AUTO
         self.status["turbo"] = self.STATIC.ONOFF.OFF
         self.status["mute"] = self.STATIC.ONOFF.OFF
@@ -1274,7 +1274,7 @@ class ac_db_debug(device):
         self.status["display"] = ac_db.STATIC.ONOFF.ON
         self.status["health"] = ac_db.STATIC.ONOFF.OFF
         self.status["ifeel"] = ac_db.STATIC.ONOFF.OFF
-        self.status["fixation_h"] = ac_db.STATIC.FIXATION.HORIZONTAL.LEFT_RIGHT_FIX
+        self.status["fixation_h"] = ac_db.STATIC.FIXATION.HORIZONTAL.OFF
         self.status["fanspeed"] = ac_db.STATIC.FAN.AUTO
         self.status["turbo"] = ac_db.STATIC.ONOFF.OFF
         self.status["mute"] = ac_db.STATIC.ONOFF.OFF

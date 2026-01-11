@@ -23,7 +23,7 @@ This is a Home Assistant custom integration for Broadlink AC devices, implementi
 - Supported modes: `HVACMode.OFF/COOL/HEAT/DRY/FAN_ONLY/AUTO`
 - Supported fan modes: `FAN_AUTO/LOW/MEDIUM/HIGH`
 - Supported swing modes: `AUTO/TOP/MIDDLE1/MIDDLE2/MIDDLE3/BOTTOM/SWING` (vertical fixation positions)
-- Supported horizontal swing modes: `LEFT_FIX/LEFT_FLAP/LEFT_RIGHT_FIX/LEFT_RIGHT_FLAP/RIGHT_FIX/RIGHT_FLAP/ON/OFF` (horizontal fixation)
+- Supported horizontal swing modes: `ON/OFF` (horizontal flap enable/disable)
 
 ### Configuration
 - Requires user input: `host` (IP address) and `mac` (MAC address)
