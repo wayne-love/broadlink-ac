@@ -449,14 +449,26 @@ class ac_db(device):
 
         ##Populate array with latest data
         self.logger.debug("Authenticating")
-        if self.auth() == False:
-            self.logger.critical("Authentication Failed to AC")
+        try:
+            if self.auth() == False:
+                self.logger.critical("Authentication Failed to AC")
+                return False
+        except ConnectTimeout:
+            self.logger.warning("Connection timeout during authentication - device may be unavailable")
+            return False
+        except ConnectError as e:
+            self.logger.error("Connection error during authentication: %s", e)
             return False
 
         self.logger.debug("Getting current details in init")
 
         ##Get the current details
-        self.get_ac_status(force_update=True)
+        try:
+            self.get_ac_status(force_update=True)
+        except ConnectTimeout:
+            self.logger.warning("Connection timeout during initial status fetch - device may be unavailable")
+        except ConnectError as e:
+            self.logger.error("Connection error during initial status fetch: %s", e)
 
     def get_ac_status(self, force_update=False):
         ##Check if the status is up to date to reduce timeout issues. Can be overwritten by force_update
