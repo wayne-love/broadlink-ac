@@ -452,13 +452,13 @@ class ac_db(device):
         try:
             if self.auth() == False:
                 self.logger.critical("Authentication Failed to AC")
-                return False
+                return
         except ConnectTimeout:
             self.logger.warning("Connection timeout during authentication - device may be unavailable")
-            return False
+            return
         except ConnectError as e:
             self.logger.error("Connection error during authentication: %s", e)
-            return False
+            return
 
         self.logger.debug("Getting current details in init")
 

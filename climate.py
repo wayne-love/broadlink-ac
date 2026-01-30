@@ -78,8 +78,8 @@ class BroadlinkACClimate(ClimateEntity):
         """Fetch the latest state from the AC."""
         try:
             status = self._ac.get_ac_status(force_update=True)
-            if status is bool:
-                _LOGGER.error("Failed to get AC status")
+            if not isinstance(status, dict): # if status if False or 0
+                _LOGGER.error("Failed to get AC status: %r", status)
                 return
             self._attr_current_temperature = status.get("ambient_temp")
             self._attr_target_temperature = status.get("temp")

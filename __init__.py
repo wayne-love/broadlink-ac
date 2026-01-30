@@ -6,8 +6,9 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.typing import ConfigType
+from homeassistant.exceptions import ConfigEntryNotReady
 
-from .ac_db import ac_db
+from .ac_db import ac_db, ConnectError, ConnectTimeout
 
 _PLATFORMS: list[Platform] = [Platform.CLIMATE]
 
@@ -23,10 +24,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Remove ':' characters from MAC and convert to byte array
     mac_bytes = bytes.fromhex(entry.data["mac"].replace(":", ""))
 
-    ac_db_instance = ac_db(
-        host=(entry.data["host"], 80),
-        mac=mac_bytes,
-    )
+    try:
+        ac_db_instance = ac_db(
+            host=(entry.data["host"], 80),
+            mac=mac_bytes,
+        )
+    except (ConnectTimeout, ConnectError) as err:
+        raise ConfigEntryNotReady(
+            f"Broadlink AC not ready at {entry.data['host']}"
+        ) from err
     entry.runtime_data = ac_db_instance
 
     # Store the AC instance in hass.data for use in the climate platform
