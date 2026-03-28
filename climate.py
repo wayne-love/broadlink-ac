@@ -15,8 +15,9 @@ from homeassistant.components.climate import (
     HVACMode,
 )
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import ATTR_TEMPERATURE, UnitOfTemperature
+from homeassistant.const import ATTR_TEMPERATURE, CONF_HOST, CONF_MAC, UnitOfTemperature
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers.device_registry import CONNECTION_NETWORK_MAC, DeviceInfo
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
 from .ac_db import ac_db, ConnectTimeout, ConnectError
@@ -60,6 +61,7 @@ class BroadlinkACClimate(ClimateEntity):
     _attr_fan_modes = SUPPORTED_FAN_MODES
     _attr_swing_modes = SUPPORTED_SWING_MODES
     _attr_swing_horizontal_modes = SUPPORTED_SWING_HORIZONTAL_MODES
+    _attr_icon = "mdi:air-conditioner"
 
     def __init__(self, ac_instance: ac_db, entry: ConfigEntry) -> None:
         """Initialize the climate entity."""
@@ -73,6 +75,17 @@ class BroadlinkACClimate(ClimateEntity):
         self._attr_fan_mode = FAN_AUTO
         self._attr_swing_mode = "AUTO"
         self._attr_swing_horizontal_mode = "OFF"
+
+    @property
+    def device_info(self) -> DeviceInfo:
+        """Return device information for the device registry."""
+        return DeviceInfo(
+            connections={(CONNECTION_NETWORK_MAC, self._entry.data[CONF_MAC])},
+            identifiers={(DOMAIN, self._entry.entry_id)},
+            name=f"Broadlink AC ({self._entry.data[CONF_HOST]})",
+            manufacturer="Broadlink",
+            model="AC Controller",
+        )
 
     async def async_update(self) -> None:
         """Fetch the latest state from the AC."""
